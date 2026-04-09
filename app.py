@@ -2,74 +2,68 @@ import streamlit as st
 import pickle
 import numpy as np
 
-# Load model
-model = pickle.load(open("model.pkl", "rb"))
-
-st.set_page_config(page_title="Influencer Detector", layout="centered")
+# Load
+model_inf = pickle.load(open("model_influencer.pkl","rb"))
+model_sus = pickle.load(open("model_suspicious.pkl","rb"))
+le_cat = pickle.load(open("cat.pkl","rb"))
+le_country = pickle.load(open("country.pkl","rb"))
 
 st.title("Influencer Detection")
-st.write("Check if an account is Real or Suspicious")
 
 # =========================
-# INPUTS (MATCH TRAINING)
+# INPUT
 # =========================
+category = st.selectbox("Category", le_cat.classes_)
+country = st.selectbox("Country", le_country.classes_)
 
-followers = st.number_input("Followers", min_value=0)
-following = st.number_input("Following", min_value=0)
-
-follower_following_ratio = st.number_input("Follower/Following Ratio", min_value=0.0)
-
-account_age_days = st.number_input("Account Age (Days)", min_value=0)
-
-posts = st.number_input("Total Posts", min_value=0)
-posts_per_day = st.number_input("Posts per Day", min_value=0.0)
-
-follow_unfollow_rate = st.slider("Follow-Unfollow Rate (0–1)", 0.0, 1.0, 0.1)
-
-spam_comments_rate = st.slider("Spam Comments Rate (0–1)", 0.0, 1.0, 0.1)
-generic_comment_rate = st.slider("Generic Comment Rate (0–1)", 0.0, 1.0, 0.1)
-
-suspicious_links_in_bio = st.selectbox("Suspicious Links in Bio", [0, 1])
+followers = st.number_input("Followers", min_value=1)
+views = st.number_input("Avg Views", min_value=0)
+likes = st.number_input("Avg Likes", min_value=0)
+comments = st.number_input("Avg Comments", min_value=0)
 
 # =========================
 # PREDICT
 # =========================
+if st.button("Analyze"):
 
-if st.button("Check Authenticity"):
+    cat = le_cat.transform([category])[0]
+    ctr = le_country.transform([country])[0]
 
-    input_data = np.array([[
-        followers,
-        following,
-        follower_following_ratio,
-        account_age_days,
-        posts,
-        posts_per_day,
-        follow_unfollow_rate,
-        spam_comments_rate,
-        generic_comment_rate,
-        suspicious_links_in_bio
-    ]])
+    data = np.array([[cat, ctr, followers, views, likes, comments]])
 
-    result = model.predict(input_data)[0]
+    inf = model_inf.predict(data)[0]
+    sus = model_sus.predict(data)[0]
+
+    # Metrics
+    engagement = ((likes + comments) / followers) * 100 if followers > 0 else 0
+    performance = (views / followers) * 100 if followers > 0 else 0
 
     # =========================
     # OUTPUT
     # =========================
+    st.subheader("Results")
 
-    if result == 1:
-        st.success("Real Influencer")
-        st.balloons()
+    st.write(f"Engagement Rate: {round(engagement,2)}%")
+    st.write(f"Performance Rate: {round(performance,2)}%")
+
+    if inf == 1:
+        st.success("Influencer Account")
     else:
-        st.error("Suspicious / Fake Account")
+        st.warning("Not an Influencer")
+
+    if sus == 1:
+        st.error("Suspicious Audience Detected")
+    else:
+        st.success("Healthy Audience")
 
     # Insights
     st.subheader("Insights")
 
-    if spam_comments_rate > 0.5:
-        st.warning("High spam activity detected")
+    if engagement < 1:
+        st.warning("Low engagement compared to followers")
 
-    if follow_unfollow_rate > 0.5:
-        st.warning("Suspicious follow-unfollow behavior")
+    if performance < 5:
+        st.info("Content reach is low")
 
-    if posts_per_day > 5:
-        st.info("Unusual posting frequency")
+    if engagement > 5:
+        st.success("Strong audience engagement ")
