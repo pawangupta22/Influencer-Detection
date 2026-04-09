@@ -35,8 +35,12 @@ if st.button("Analyze"):
     sus = model_sus.predict(data)[0]
 
     # Metrics
-    engagement = ((likes + comments) / followers) * 100 if followers > 0 else 0
-    performance = (views / followers) * 100 if followers > 0 else 0
+    if followers > 0:
+        engagement = ((likes + comments) / followers) * 100
+        performance = (views / followers) * 100
+    else:
+        engagement = 0
+        performance = 0
 
     # =========================
     # OUTPUT
