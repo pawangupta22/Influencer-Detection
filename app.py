@@ -20,7 +20,7 @@ st.write("Enter details to check if a person is an influencer")
 
 @st.cache_data
 def load_model():
-    df = pd.read_csv("influncer_dection_Country.csv")
+    df = pd.read_csv("influncer_dection.csv")
 
     # --- Data Cleaning ---
     def convert(x):
