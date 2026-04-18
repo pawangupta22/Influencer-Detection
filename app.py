@@ -1,56 +1,101 @@
+# ==============================
+# Influencer Detection Dashboard
+# ==============================
+
 import streamlit as st
-import pickle
-import numpy as np
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 
-# Load model
-model = pickle.load(open("model.pkl", "rb"))
+# ==============================
+# Page Config
+# ==============================
+st.set_page_config(page_title="Influencer Detector", layout="centered")
 
-# Page config
-st.set_page_config(page_title="Influencer Detection", layout="centered")
+st.title("Influencer Detection Dashboard")
+st.write("Enter details to check if a person is an influencer")
 
-# Title
-st.title("Influencer Detection System")
+# ==============================
+# Load & Train Model
+# ==============================
 
+@st.cache_data
+def load_model():
+    df = pd.read_csv("influncer_dection_Country.csv")
 
-# CENTER INPUT FORM
-st.subheader("Enter Influencer Details")
+    # --- Data Cleaning ---
+    def convert(x):
+        x = str(x).replace(',', '').strip()
+        if 'M' in x:
+            return float(x.replace('M','')) * 1000000
+        elif 'K' in x:
+            return float(x.replace('K','')) * 1000
+        else:
+            try:
+                return float(x)
+            except:
+                return 0
+
+    df['followers'] = df['followers'].apply(convert)
+    df['views'] = df['views (avg.)'].apply(convert)
+    df['likes'] = df['likes (avg.)'].apply(convert)
+    df['comments'] = df['comments (avg.)'].apply(convert)
+
+    # Remove unwanted columns
+    df.drop(['views (avg.)','likes (avg.)','comments (avg.)','category','country'], axis=1, inplace=True)
+
+    # Feature Engineering
+    df['engagement_rate'] = (df['likes'] + df['comments']) / df['followers']
+    df.fillna(0, inplace=True)
+
+    # Target
+    df['is_influencer'] = df.apply(
+        lambda row: 1 if row['followers'] >= 100000 and row['engagement_rate'] > 0.05 else 0,
+        axis=1
+    )
+
+    X = df[['followers','views','likes','comments','engagement_rate']]
+    y = df['is_influencer']
+
+    model = RandomForestClassifier()
+    model.fit(X, y)
+
+    return model
+
+model = load_model()
+
+# ==============================
+# User Input Section
+# ==============================
+
+st.subheader("📥 Enter Data")
 
 followers = st.number_input("Followers", min_value=1)
 views = st.number_input("Average Views", min_value=0)
 likes = st.number_input("Average Likes", min_value=0)
 comments = st.number_input("Average Comments", min_value=0)
-months_old = st.number_input("Account Age (months)", min_value=0)
 
-st.markdown("")
+# ==============================
+# Prediction
+# ==============================
 
-# Prediction Button (centered feel)
-if st.button("Analyze Influencer"):
+if st.button("Check Influencer"):
 
-    # Calculations
-    view_rate = views / followers if followers > 0 else 0
-    engagement_rate = (likes + comments) / followers if followers > 0 else 0
+    engagement_rate = (likes + comments) / followers
 
-    features = np.array([[followers, views, likes, comments,
-                          view_rate, engagement_rate, months_old]])
+    data = [[followers, views, likes, comments, engagement_rate]]
 
-    prediction = model.predict(features)[0]
+    result = model.predict(data)
 
-    st.markdown("---")
+    st.write(f"Engagement Rate: {engagement_rate:.4f}")
 
-    # RESULT DISPLAY
-    st.subheader("Result")
-
-    if "Genuine" in prediction:
-        st.success(f"{prediction}")
-    elif "Fake" in prediction:
-        st.error(f" {prediction}")
-    elif "New" in prediction:
-        st.info(f"{prediction}")
+    if result[0] == 1:
+        st.success("This person is an Influencer")
     else:
-        st.warning(f" {prediction}")
+        st.error("This person is NOT an Influencer")
 
-    # Metrics
-    st.markdown("### Metrics")
+# ==============================
+# Footer
+# ==============================
 
-    st.write(f"**View Rate:** {round(view_rate, 4)}")
-    st.write(f"**Engagement Rate:** {round(engagement_rate, 4)}")
+st.markdown("---")
+st.caption("Built using Machine Learning & Streamlit")
