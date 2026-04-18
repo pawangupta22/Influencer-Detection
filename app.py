@@ -67,7 +67,7 @@ model = load_model()
 # User Input Section
 # ==============================
 
-st.subheader("📥 Enter Data")
+st.subheader("Enter Data")
 
 followers = st.number_input("Followers", min_value=1)
 views = st.number_input("Average Views", min_value=0)
