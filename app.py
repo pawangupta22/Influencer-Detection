@@ -1,113 +1,100 @@
 import streamlit as st
 import joblib
-import pandas as pd
 
-# -----------------------------
-# Page Config
-# -----------------------------
-st.set_page_config(
-    page_title="Influencer Detection",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# -----------------------------
-# Load Model
-# -----------------------------
+# Load model
 model = joblib.load("model.pkl")
 le = joblib.load("encoder.pkl")
 
-# -----------------------------
+# Page Config
+st.set_page_config(page_title="Influencer Detection", layout="wide")
+
 # Custom CSS
-# -----------------------------
 st.markdown("""
 <style>
-.main {
-    background: linear-gradient(135deg, #0f172a, #1e293b);
+.stApp {
+    background: #0f172a;
+}
+
+h1 {
     color: white;
+    text-align: center;
+    font-size: 42px;
+    margin-bottom: 5px;
 }
-.block-container {
-    padding-top: 2rem;
+
+.subtext {
+    color: #94a3b8;
+    text-align: center;
+    margin-bottom: 30px;
 }
-.title {
-    text-align:center;
-    font-size:42px;
-    font-weight:800;
-    color:#38bdf8;
+
+div[data-baseweb="input"] input {
+    background: #1e293b !important;
+    color: white !important;
+    border-radius: 10px !important;
+    border: 1px solid #334155 !important;
+    padding: 10px !important;
 }
-.subtitle{
-    text-align:center;
-    color:#cbd5e1;
-    font-size:18px;
-    margin-bottom:30px;
+
+div[data-baseweb="input"] input:focus {
+    border: 1px solid #3b82f6 !important;
+    box-shadow: 0 0 8px rgba(59,130,246,0.4);
 }
-.metric-box{
-    background:#1e293b;
-    padding:15px;
-    border-radius:15px;
-    text-align:center;
-    box-shadow:0 4px 10px rgba(0,0,0,0.2);
+
+label {
+    color: white !important;
+    font-weight: 500;
 }
-.stButton>button{
-    width:100%;
-    background:linear-gradient(90deg,#06b6d4,#3b82f6);
-    color:white;
-    border:none;
-    padding:14px;
-    font-size:18px;
-    border-radius:12px;
-    font-weight:bold;
+
+.stButton>button {
+    width: 100%;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 600;
 }
-.stButton>button:hover{
-    background:linear-gradient(90deg,#0284c7,#2563eb);
+
+.stButton>button:hover {
+    background: #2563eb;
+}
+
+.result-box {
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 12px;
+    color: white;
+    margin-top: 20px;
+    border: 1px solid #334155;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# -----------------------------
 # Header
-# -----------------------------
-st.markdown('<div class="title">Influencer Detection System</div>', unsafe_allow_html=True)
+st.markdown("<h1>Influencer Detection System</h1>", unsafe_allow_html=True)
+st.markdown("<p class='subtext'>Analyze social media profile performance</p>", unsafe_allow_html=True)
 
-# -----------------------------
-# Sidebar
-# -----------------------------
-st.sidebar.header("About")
-st.sidebar.info("""
-This ML model predicts whether a user is:
-
-Real Influencer  
-Growing Influencer  
-Not Influencer  
-
-Enter social media profile data to analyze.
-""")
-
-# -----------------------------
-# Input Layout
-# -----------------------------
+# Inputs
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("Basic Stats")
-    followers = st.number_input("Followers", min_value=1, step=100)
-    following = st.number_input("Following", min_value=0, step=10)
-    posts = st.number_input("Total Posts", min_value=0, step=1)
-    avg_posts_per_day = st.slider("Avg Posts Per Day", 0.0, 20.0, 1.0)
-
-    account_age = st.slider("Account Age (Months)", 1, 120, 12)
+    followers = st.number_input("Followers", min_value=1)
+    following = st.number_input("Following", min_value=0)
+    posts = st.number_input("Posts", min_value=0)
+    avg_posts_per_day = st.number_input("Average Posts Per Day", min_value=0.0)
 
 with col2:
-    st.subheader("Engagement Stats")
-    avg_views = st.number_input("Avg Views / Post", min_value=0, step=100)
-    avg_likes = st.number_input("Avg Likes / Post", min_value=0, step=10)
-    avg_comments = st.number_input("Avg Comments / Post", min_value=0, step=1)
-    avg_shares = st.number_input("Avg Shares / Post", min_value=0, step=1)
+    avg_views = st.number_input("Average Views Per Post", min_value=0)
+    avg_likes = st.number_input("Average Likes Per Post", min_value=0)
+    avg_comments = st.number_input("Average Comments Per Post", min_value=0)
+    avg_shares = st.number_input("Average Shares Per Post", min_value=0)
 
-# -----------------------------
-# Predict Button
-# -----------------------------
-if st.button("Analyze Profile"):
+account_age = st.number_input("Account Age (Months)", min_value=1)
+
+# Predict
+if st.button("Predict Result"):
 
     engagement_rate = (avg_likes + avg_comments + avg_shares) / followers
     views_ratio = avg_views / followers
@@ -130,44 +117,16 @@ if st.button("Analyze Profile"):
     result = le.inverse_transform(pred)[0]
 
     if result in ["Real Influencer", "Growing Influencer"]:
-        status = "Influencer ✅"
-        color = "green"
+        status = "Influencer"
     else:
-        status = "Not Influencer ❌"
-        color = "red"
+        status = "Not Influencer"
 
-    # -----------------------------
-    # Results
-    # -----------------------------
-    st.markdown("---")
-    st.subheader("Prediction Result")
-
-    c1, c2, c3 = st.columns(3)
-
-    c1.metric("User Type", result)
-    c2.metric("Status", status)
-    c3.metric("Engagement Rate", f"{engagement_rate:.2%}")
-
-    st.metric("Views Ratio", f"{views_ratio:.2f}")
-
-    # Data Summary Table
-    st.subheader("Input Summary")
-
-    df = pd.DataFrame({
-        "Metric": [
-            "Followers", "Following", "Posts", "Avg Posts/Day",
-            "Views", "Likes", "Comments", "Shares", "Account Age"
-        ],
-        "Value": [
-            followers, following, posts, avg_posts_per_day,
-            avg_views, avg_likes, avg_comments, avg_shares, account_age
-        ]
-    })
-
-    st.dataframe(df, use_container_width=True)
-
-    # Success Message
-    if "Influencer" in status:
-        st.success("This profile shows strong influencer signals.")
-    else:
-        st.warning("This profile currently has low influencer signals.")
+    st.markdown(f"""
+    <div class="result-box">
+        <h3>Prediction Result</h3>
+        <p><strong>User Type:</strong> {result}</p>
+        <p><strong>Status:</strong> {status}</p>
+        <p><strong>Engagement Rate:</strong> {round(engagement_rate,4)}</p>
+        <p><strong>Views Ratio:</strong> {round(views_ratio,4)}</p>
+    </div>
+    """, unsafe_allow_html=True)
