@@ -6,8 +6,7 @@ import pandas as pd
 # Page Config
 # -----------------------------
 st.set_page_config(
-    page_title="Influencer Detection AI",
-    page_icon="📊",
+    page_title="Influencer Detection",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -68,19 +67,18 @@ st.markdown("""
 # -----------------------------
 # Header
 # -----------------------------
-st.markdown('<div class="title">📊 Influencer Detection System</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Advanced AI Based Social Media Profile Analyzer</div>', unsafe_allow_html=True)
+st.markdown('<div class="title">Influencer Detection System</div>', unsafe_allow_html=True)
 
 # -----------------------------
 # Sidebar
 # -----------------------------
-st.sidebar.header("⚙️ About")
+st.sidebar.header("About")
 st.sidebar.info("""
-This AI model predicts whether a user is:
+This ML model predicts whether a user is:
 
-✅ Real Influencer  
-📈 Growing Influencer  
-❌ Not Influencer  
+Real Influencer  
+Growing Influencer  
+Not Influencer  
 
 Enter social media profile data to analyze.
 """)
@@ -91,7 +89,7 @@ Enter social media profile data to analyze.
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("📌 Basic Stats")
+    st.subheader("Basic Stats")
     followers = st.number_input("Followers", min_value=1, step=100)
     following = st.number_input("Following", min_value=0, step=10)
     posts = st.number_input("Total Posts", min_value=0, step=1)
@@ -100,7 +98,7 @@ with col1:
     account_age = st.slider("Account Age (Months)", 1, 120, 12)
 
 with col2:
-    st.subheader("📈 Engagement Stats")
+    st.subheader("Engagement Stats")
     avg_views = st.number_input("Avg Views / Post", min_value=0, step=100)
     avg_likes = st.number_input("Avg Likes / Post", min_value=0, step=10)
     avg_comments = st.number_input("Avg Comments / Post", min_value=0, step=1)
@@ -109,7 +107,7 @@ with col2:
 # -----------------------------
 # Predict Button
 # -----------------------------
-if st.button("🚀 Analyze Profile"):
+if st.button("Analyze Profile"):
 
     engagement_rate = (avg_likes + avg_comments + avg_shares) / followers
     views_ratio = avg_views / followers
@@ -142,7 +140,7 @@ if st.button("🚀 Analyze Profile"):
     # Results
     # -----------------------------
     st.markdown("---")
-    st.subheader("📊 Prediction Result")
+    st.subheader("Prediction Result")
 
     c1, c2, c3 = st.columns(3)
 
@@ -153,7 +151,7 @@ if st.button("🚀 Analyze Profile"):
     st.metric("Views Ratio", f"{views_ratio:.2f}")
 
     # Data Summary Table
-    st.subheader("📄 Input Summary")
+    st.subheader("Input Summary")
 
     df = pd.DataFrame({
         "Metric": [
