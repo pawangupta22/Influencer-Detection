@@ -8,50 +8,67 @@ le = joblib.load("encoder.pkl")
 # Page Config
 st.set_page_config(page_title="Influencer Detection", layout="centered")
 
-# Black & White CSS
+# Auto Light + Dark Mode CSS
 st.markdown("""
 <style>
-.stApp {
-    background-color: black;
-    color: white;
+
+/* Light Mode */
+@media (prefers-color-scheme: light) {
+    .stApp {
+        background-color: white;
+        color: black;
+    }
+
+    h1, label, p {
+        color: black !important;
+    }
+
+    div[data-baseweb="input"] input {
+        background: white !important;
+        color: black !important;
+        border: 1px solid black !important;
+        border-radius: 6px !important;
+    }
+
+    .stButton>button {
+        background: black;
+        color: white;
+        border-radius: 6px;
+        border: none;
+        width: 100%;
+    }
 }
 
-h1 {
-    text-align: center;
-    color: white;
-    margin-bottom: 20px;
-}
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    .stApp {
+        background-color: black;
+        color: white;
+    }
 
-label {
-    color: white !important;
-    font-weight: 500;
-}
+    h1, label, p {
+        color: white !important;
+    }
 
-div[data-baseweb="input"] input {
-    background-color: #111111 !important;
-    color: white !important;
-    border: 1px solid white !important;
-    border-radius: 6px !important;
-}
+    div[data-baseweb="input"] input {
+        background: #111111 !important;
+        color: white !important;
+        border: 1px solid white !important;
+        border-radius: 6px !important;
+    }
 
-textarea {
-    background-color: #111111 !important;
-    color: white !important;
-    border: 1px solid white !important;
+    .stButton>button {
+        background: white;
+        color: black;
+        border-radius: 6px;
+        border: none;
+        width: 100%;
+    }
 }
 
 .stButton>button {
-    width: 100%;
-    background-color: white;
-    color: black;
-    border: none;
     padding: 10px;
-    border-radius: 6px;
     font-weight: bold;
-}
-
-.stButton>button:hover {
-    background-color: #dddddd;
 }
 </style>
 """, unsafe_allow_html=True)
