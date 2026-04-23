@@ -5,91 +5,26 @@ import joblib
 model = joblib.load("model.pkl")
 le = joblib.load("encoder.pkl")
 
-# Page Config
-st.set_page_config(page_title="Influencer Detection", layout="centered")
+st.set_page_config(page_title="Influencer Detection")
 
-# Auto Light + Dark Mode CSS
-st.markdown("""
-<style>
-
-/* Light Mode */
-@media (prefers-color-scheme: light) {
-    .stApp {
-        background-color: white;
-        color: black;
-    }
-
-    h1, label, p {
-        color: black !important;
-    }
-
-    div[data-baseweb="input"] input {
-        background: white !important;
-        color: black !important;
-        border: 1px solid black !important;
-        border-radius: 6px !important;
-    }
-
-    .stButton>button {
-        background: black;
-        color: white;
-        border-radius: 6px;
-        border: none;
-        width: 100%;
-    }
-}
-
-/* Dark Mode */
-@media (prefers-color-scheme: dark) {
-    .stApp {
-        background-color: black;
-        color: white;
-    }
-
-    h1, label, p {
-        color: white !important;
-    }
-
-    div[data-baseweb="input"] input {
-        background: #111111 !important;
-        color: white !important;
-        border: 1px solid white !important;
-        border-radius: 6px !important;
-    }
-
-    .stButton>button {
-        background: white;
-        color: black;
-        border-radius: 6px;
-        border: none;
-        width: 100%;
-    }
-}
-
-.stButton>button {
-    padding: 10px;
-    font-weight: bold;
-}
-</style>
-""", unsafe_allow_html=True)
-
-# Title
 st.title("Influencer Detection System")
+
+st.write("Enter profile details")
 
 # Inputs
 followers = st.number_input("Followers", min_value=1)
 following = st.number_input("Following", min_value=0)
 posts = st.number_input("Posts", min_value=0)
-avg_posts_per_day = st.number_input("Average Posts Per Day", min_value=0.0)
+avg_posts_per_day = st.number_input("Avg Posts Per Day", min_value=0.0)
 
-avg_views = st.number_input("Average Views Per Post", min_value=0)
-avg_likes = st.number_input("Average Likes Per Post", min_value=0)
-avg_comments = st.number_input("Average Comments Per Post", min_value=0)
-avg_shares = st.number_input("Average Shares Per Post", min_value=0)
+avg_views = st.number_input("Avg Views Per Post", min_value=0)
+avg_likes = st.number_input("Avg Likes Per Post", min_value=0)
+avg_comments = st.number_input("Avg Comments Per Post", min_value=0)
+avg_shares = st.number_input("Avg Shares Per Post", min_value=0)
 
-account_age = st.number_input("Account Age (Months)", min_value=1)
+account_age = st.number_input("Account Age (months)", min_value=1)
 
-# Predict
+# Prediction
 if st.button("Predict"):
 
     engagement_rate = (avg_likes + avg_comments + avg_shares) / followers
@@ -112,12 +47,15 @@ if st.button("Predict"):
     pred = model.predict(data)
     result = le.inverse_transform(pred)[0]
 
+    # Influencer or Not
     if result in ["Real Influencer", "Growing Influencer"]:
         status = "Influencer"
     else:
         status = "Not Influencer"
 
-    st.success(f"User Type: {result}")
-    st.write(f"Status: {status}")
-    st.write(f"Engagement Rate: {round(engagement_rate,4)}")
-    st.write(f"Views Ratio: {round(views_ratio,4)}")
+    # Output
+    st.subheader("Result")
+    st.write("User Type:", result)
+    st.write("Status:", status)
+    st.write("Engagement Rate:", round(engagement_rate, 4))
+    st.write("Views Ratio:", round(views_ratio, 4))
